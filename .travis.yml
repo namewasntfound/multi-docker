@@ -1,0 +1,22 @@
+language: generic
+services:
+  - docker
+  
+before_install:
+  - docker build -t namewasntfound/react-test -f ./client/Dockerfile.dev ./client
+  
+script:
+  - docker run namewasntfound/react-test npm test -- --coverage
+  
+after_success:
+  - docker build -t namewasntfound/multi-client ./client
+  - docket build -t namewasntfound/multi-nginx ./nginx
+  - docket build -t namewasntfound/multi-server ./server
+  - docket build -t namewasntfound/multi-worker ./worker
+  
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  
+  - docker push namewasntfound/multi-client
+  - docker push namewasntfound/multi-nginx
+  - docker push namewasntfound/multi-server
+  - docker push namewasntfound/multi-worker
